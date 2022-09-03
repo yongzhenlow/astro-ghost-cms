@@ -1,0 +1,25 @@
+---
+import probe from 'probe-image-size';
+import { Picture } from '@astrojs/image/components';
+
+export interface Props {
+  src: string;
+  alt?: string;
+  classNames?: string;
+  widths: number[];
+  sizes: string;
+}
+
+const { src, alt, classNames, widths, sizes } = Astro.props;
+
+const metadata = await probe(src);
+---
+
+<Picture
+  class={classNames ?? ''}
+  src={src}
+  widths={widths}
+  aspectRatio={metadata.width / metadata.height}
+  sizes={sizes}
+  alt={alt ?? ''}
+/>

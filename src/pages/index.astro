@@ -1,0 +1,61 @@
+---
+import PostCard from '@components/PostCard.astro';
+import { settings } from '@store/settings';
+import themeConfig from '@utils/theme.config';
+import ghostClient from '@utils/ghost-client';
+import Layout from '@layouts/Layout.astro';
+import type { PostsOrPages } from 'types/ghost-content-api';
+
+const posts: PostsOrPages = await ghostClient.posts.browse({
+  limit: 'all',
+  include: ['tags', 'authors'],
+});
+---
+
+<Layout bodyClass="home-template">
+  <div
+    class:list={[
+      'site-header-content outer',
+      {
+        'left-aligned': themeConfig.header_style === 'Left aligned',
+        'no-content':
+          !themeConfig.show_publication_cover &&
+          themeConfig.header_style === 'Hidden',
+      },
+    ]}
+  >
+    {
+      themeConfig.show_publication_cover && settings.cover_image && (
+        <img
+          class="site-header-cover"
+          src={settings.cover_image}
+          alt={settings.title}
+        />
+      )
+    }
+
+    {
+      themeConfig.header_style !== 'Hidden' && (
+        <div class="site-header-inner inner">
+          {!themeConfig.show_logo_in_navigation &&
+            (settings.logo ? (
+              <img class="site-logo" src={settings.logo} alt={settings.title} />
+            ) : (
+              <h1 class="site-title">{settings.title}</h1>
+            ))}
+          {settings.description && (
+            <p class="site-description">{settings.description}</p>
+          )}
+        </div>
+      )
+    }
+  </div>
+
+  <main id="site-main" class="site-main outer">
+    <div class="inner posts">
+      <div class="post-feed">
+        {posts.map((post, i) => <PostCard post={post} index={i} />)}
+      </div>
+    </div>
+  </main>
+</Layout>

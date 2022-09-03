@@ -1,0 +1,89 @@
+---
+import { readingTime } from '@tryghost/helpers';
+import themeConfig from '@utils/theme.config';
+import IconFire from '@components/icons/IconFire.astro';
+import RemotePicture from '@components/RemotePicture.astro';
+import type { PostOrPage } from 'types/ghost-content-api';
+import dateFormat from '@utils/date-format';
+import type { dateTimeFormat } from 'astro/dist/core/logger/core';
+
+export interface Props {
+  post: PostOrPage;
+  index?: number;
+}
+
+const { post, index = 0 } = Astro.props;
+---
+
+<!-- @todo add paged class: themeConfig.feed_layout === "List" & "paged" && "post-card-large" -->
+<article
+  class:list={[
+    'post-card',
+    post.tags && post.tags.map((tag) => `tag-${tag.slug}`),
+    {
+      featured: post.featured,
+      page: post.page,
+      'no-image': !post.feature_image,
+      'keep-ratio': themeConfig.feed_layout === 'Grid',
+      'post-card-large':
+        themeConfig.feed_layout === 'List' && Astro.url.pathname === '/',
+    },
+    themeConfig.feed_layout === 'Classic' &&
+      Astro.url.pathname === '/' && {
+        'post-card-large': index === 0,
+        dynamic: [1, 2].includes(index),
+      },
+    post.access ?? `post-access-${post.visibility}`,
+  ]}
+>
+  {
+    post.feature_image && (
+      <a class="post-card-image-link" href={`/${post.slug}`}>
+        <RemotePicture
+          classNames="post-card-image"
+          src={post.feature_image!}
+          alt={post.feature_image_alt ?? post.title!}
+          widths={[300, 600, 1000, 2000]}
+          sizes="(max-width: 1000px) 400px, 800px"
+        />
+      </a>
+    )
+  }
+
+  <div class="post-card-content">
+    <a class="post-card-content-link" href={`/${post.slug}`}>
+      <header class="post-card-header">
+        <div class="post-card-tags">
+          {
+            post.primary_tag && (
+              <span class="post-card-primary-tag">{post.primary_tag.name}</span>
+            )
+          }
+
+          {
+            post.featured && (
+              <span class="post-card-featured">
+                <IconFire /> Featured
+              </span>
+            )
+          }
+        </div>
+        <h2 class="post-card-title">
+          {post.title}
+        </h2>
+      </header>
+      <div class="post-card-excerpt">{post.excerpt}</div>
+    </a>
+
+    <footer class="post-card-meta">
+      {
+        post.published_at && (
+          <div class="post-card-meta-date">
+            {dateFormat(new Date(post.published_at))}
+          </div>
+        )
+      }
+      <span class="post-card-meta-length">{readingTime(post)}</span>
+    </footer>
+  </div>
+</article>

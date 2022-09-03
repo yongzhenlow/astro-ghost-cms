@@ -1,0 +1,55 @@
+---
+import type { Params, PostOrPage } from '@tryghost/content-api';
+import ghostClient from '@utils/ghost-client';
+import Layout from '@layouts/Layout.astro';
+import Page from '@components/Page.astro';
+import Post from '@components/Post.astro';
+
+/** @todo combine missing typed params altogether, seems like PostOrPage is missing some properties from response */
+interface PostOrPageMissingParams {
+  page: boolean;
+  visibility: 'public' | 'members' | 'paid' | 'tiers';
+}
+
+export interface Props {
+  postOrPage: PostOrPage & PostOrPageMissingParams;
+}
+
+export async function getStaticPaths() {
+  const browseParams: Params = {
+    limit: 'all',
+    include: ['tags', 'authors'],
+  };
+
+  const posts = await ghostClient.posts.browse(browseParams);
+  const pages = (await ghostClient.pages.browse(browseParams)).map((page) => ({
+    page: true,
+    ...page,
+  }));
+  const postsOrPages = [...posts, ...pages];
+
+  return postsOrPages.map((postOrPage) => ({
+    params: { slug: postOrPage.slug },
+    props: { postOrPage },
+  }));
+}
+
+const { postOrPage } = Astro.props;
+---
+
+<Layout
+  title={postOrPage.title}
+  description={postOrPage.custom_excerpt ?? postOrPage.meta_description}
+  bodyClass={{
+    'post-template': postOrPage.visibility === 'public' && !postOrPage.page,
+    [`page-template page-${postOrPage.slug}`]:
+      postOrPage.visibility === 'public' && postOrPage.page,
+    'private-template': postOrPage.visibility !== 'public',
+  }}
+  codeInjectionHead={postOrPage.codeinjection_head}
+  codeInjectionFoot={postOrPage.codeinjection_foot}
+>
+  <main class="container">
+    {postOrPage.page ? <Page page={postOrPage} /> : <Post post={postOrPage} />}
+  </main>
+</Layout>

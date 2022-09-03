@@ -1,0 +1,27 @@
+---
+export interface Props {
+  navigation: Array<{
+    label: string;
+    url: string;
+  }>;
+}
+
+const { navigation } = Astro.props;
+---
+
+<ul class="nav">
+  {
+    navigation.map(({ label, url }) => (
+      <li
+        class:list={[
+          'nav',
+          {
+            'nav-current': url === Astro.url.pathname,
+          },
+        ]}
+      >
+        <a href={url}>{label}</a>
+      </li>
+    ))
+  }
+</ul>

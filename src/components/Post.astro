@@ -1,0 +1,151 @@
+---
+import type { PostOrPage } from '@tryghost/content-api';
+import { readingTime } from '@tryghost/helpers';
+import ghostClient from '@utils/ghost-client';
+import themeConfig from '@utils/theme.config';
+import PostCard from '@components/PostCard.astro';
+import IconFire from '@components/icons/IconFire.astro';
+import IconAvatar from '@components/icons/IconAvatar.astro';
+import RemotePicture from '@components/RemotePicture.astro';
+import dateFormat from '@utils/date-format';
+
+export interface Props {
+  post: PostOrPage;
+}
+
+const { post } = Astro.props;
+
+const morePosts = await ghostClient.posts.browse({
+  filter: `id:-${post.id}`,
+  limit: 3,
+  include: ['tags', 'authors'],
+});
+---
+
+<main id="site-main" class="site-main">
+  <article
+    class:list={[
+      'article',
+      post.tags && post.tags.map((tag) => `tag-${tag.slug}`),
+      {
+        featured: post.featured,
+        'no-image': !post.feature_image,
+        'image-full': themeConfig.post_image_style === 'Full',
+        'image-small': themeConfig.post_image_style === 'Small',
+      },
+    ]}
+  >
+    <header class="article-header gh-canvas">
+      <div class="article-tag post-card-tags">
+        {
+          post.primary_tag && (
+            <span class="post-card-primary-tag">
+              <a href={`/tag/${post.primary_tag.slug}`}>
+                {post.primary_tag.name}
+              </a>
+            </span>
+          )
+        }
+        {
+          post.featured && (
+            <span class="post-card-featured">
+              <IconFire /> Featured
+            </span>
+          )
+        }
+      </div>
+
+      <h1 class="article-title">{post.title}</h1>
+
+      {
+        post.custom_excerpt && (
+          <p class="article-excerpt">{post.custom_excerpt}</p>
+        )
+      }
+
+      <div class="article-byline">
+        <section class="article-byline-content">
+          <ul class="author-list">
+            {
+              post.authors?.map(({ name, profile_image, slug }) => (
+                <li class="author-list-item">
+                  {profile_image ? (
+                    <a href={`/author/${slug}`} class="author-avatar">
+                      <img
+                        class="author-profile-image"
+                        src={profile_image}
+                        alt={name}
+                      />
+                    </a>
+                  ) : (
+                    <a
+                      href={`/author/${slug}`}
+                      class="author-avatar author-profile-image"
+                    >
+                      <IconAvatar />
+                    </a>
+                  )}
+                </li>
+              ))
+            }
+          </ul>
+
+          <div class="article-byline-meta">
+            <h4 class="author-name">
+              {
+                post.authors?.map(({ name, slug }, i, { length }) => (
+                  <>
+                    <a href={`/author/${slug}`}>{name}</a>
+                    <span>{length !== 1 && length > i && ', '}</span>
+                  </>
+                ))
+              }
+            </h4>
+            <div class="byline-meta-content">
+              {
+                post.published_at && (
+                  <span class="byline-meta-date">
+                    {dateFormat(new Date(post.published_at))}
+                  </span>
+                )
+              }
+              <span class="byline-reading-time"
+                ><span class="bull">&bull;</span> {readingTime(post)}
+              </span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {
+        themeConfig.post_image_style !== 'Hidden' && post.feature_image && (
+          <figure class="article-image">
+            <RemotePicture
+              src={post.feature_image}
+              alt={post.feature_image_alt ?? post.title!}
+              widths={[300, 600, 1000, 2000]}
+              sizes="(min-width: 1400px) 1400px, 92vw"
+            />
+            {post.feature_image_caption && (
+              <figcaption>{post.feature_image_caption}</figcaption>
+            )}
+          </figure>
+        )
+      }
+    </header>
+
+    <section class="gh-content gh-canvas" set:html={post.html}></section>
+  </article>
+</main>
+
+{
+  themeConfig.show_recent_posts_footer && morePosts && (
+    <aside class="read-more-wrap outer">
+      <div class="read-more inner">
+        {morePosts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    </aside>
+  )
+}

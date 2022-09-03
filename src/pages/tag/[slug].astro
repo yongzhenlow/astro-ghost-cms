@@ -1,0 +1,73 @@
+---
+import type { Tag } from '@tryghost/content-api';
+import PostCard from '@components/PostCard.astro';
+import RemotePicture from '@components/RemotePicture.astro';
+import Layout from '@layouts/Layout.astro';
+import ghostClient from '@utils/ghost-client';
+
+export interface Props {
+  tag: Tag;
+}
+
+export async function getStaticPaths() {
+  const tags = await ghostClient.tags.browse({
+    limit: 'all',
+    filter: 'visibility:public',
+  });
+
+  return tags.map((tag) => ({
+    params: { slug: tag.slug },
+    props: { tag },
+  }));
+}
+
+const { tag } = Astro.props;
+
+const posts = await ghostClient.posts.browse({
+  filter: `tag:${tag.slug}`,
+  limit: 'all',
+  include: ['tags', 'authors'],
+});
+---
+
+<Layout
+  title={tag.meta_title ?? tag.name}
+  description={tag.meta_description ?? tag.description}
+  bodyClass={['tag-template', `tag-${tag.slug}`]}
+  codeInjectionHead={(tag as any).codeinjection_head}
+  codeInjectionFoot={(tag as any).codeinjection_foot}
+>
+  <main id="site-main" class="site-main outer">
+    <div class="inner posts">
+      <div class="post-feed">
+        <section class="post-card post-card-large">
+          {
+            tag.feature_image && (
+              <div class="post-card-image-link">
+                <RemotePicture
+                  classNames="post-card-image"
+                  widths={[300, 600, 1000, 2000]}
+                  sizes="(max-width: 1000px) 400px, 800px"
+                  src={tag.feature_image}
+                  alt={tag.name}
+                />
+              </div>
+            )
+          }
+          <div class="post-card-content">
+            <div class="post-card-content-link">
+              <header class="post-card-header">
+                <h2 class="post-card-title">{tag.name}</h2>
+              </header>
+              <div class="post-card-excerpt">
+                {tag.description ? tag.description : `A collection of posts`}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {posts.map((post) => <PostCard post={post} />)}
+      </div>
+    </div>
+  </main>
+</Layout>

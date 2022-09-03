@@ -1,0 +1,218 @@
+---
+import { settings } from '@store/settings';
+import themeConfig from '@utils/theme.config';
+import Navigation from '@components/Navigation.astro';
+import IconSearch from '@components/icons/IconSearch.astro';
+import IconFacebook from '@components/icons/IconFacebook.astro';
+import IconTwitter from '@components/icons/IconTwitter.astro';
+import type { Nullable } from '@tryghost/content-api';
+import dateFormat from '@utils/date-format';
+
+/** @todo add pagination, default 25 per page */
+//     if (context.includes('paged')) {
+//         classes.push('paged');
+//     }
+
+export interface Props {
+  title?: Nullable<string>;
+  description?: Nullable<string>;
+  bodyClass: string | object | [];
+  codeInjectionHead?: Nullable<string>;
+  codeInjectionFoot?: Nullable<string>;
+}
+
+const { title, description, bodyClass, codeInjectionHead, codeInjectionFoot } =
+  Astro.props;
+
+/**
+ * Using this instead as <style define:vars> doesn't work as expected
+ */
+const accentColorStyleTag =
+  settings.accent_color &&
+  `<style>:root {--ghost-accent-color: ${settings.accent_color};}</style>`;
+---
+
+<!DOCTYPE html>
+<html
+  lang={settings.lang}
+  class:list={{
+    'dark-mode': themeConfig.color_scheme === 'Dark',
+    'auto-mode': themeConfig.color_scheme === 'Auto',
+  }}
+>
+  <head>
+    <title>{title ?? settings.meta_title ?? settings.title}</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" type="image/png" href={settings.icon} />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content={description ?? settings.meta_description ?? settings.description}
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/ghost@5.12.0/content/themes/casper/assets/built/screen.css"
+      integrity="sha256-wsxcxrerngSU0iwUBxk3vCoMD2jQBQ7PeDZnvewMHsQ="
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/combine/npm/ghost@5.12.0/core/frontend/src/cards/css/audio.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/before-after.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/blockquote.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/bookmark.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/button.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/callout.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/file.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/gallery.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/header.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/nft.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/product.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/toggle.min.css,npm/ghost@5.12.0/core/frontend/src/cards/css/video.min.css"
+    />
+
+    <Fragment set:html={accentColorStyleTag} />
+
+    <Fragment set:html={settings.codeinjection_head} />
+    <Fragment set:html={codeInjectionHead} />
+  </head>
+
+  <body
+    class:list={[
+      bodyClass,
+      {
+        'has-serif-title': themeConfig.title_font === 'Elegant serif',
+        'has-sans-body': themeConfig.body_font === 'Modern sans-serif',
+        'has-cover': themeConfig.show_publication_cover,
+        'no-logo':
+          Astro.url.pathname === '/' && !themeConfig.show_logo_in_navigation,
+      },
+    ]}
+  >
+    <div class="viewport">
+      <header id="gh-head" class="gh-head outer">
+        <nav class="gh-head-inner inner">
+          <div class="gh-head-brand">
+            <a
+              class:list={[
+                'gh-head-logo',
+                {
+                  'no-image': !settings.logo,
+                },
+              ]}
+              href={settings.url}
+            >
+              {
+                settings.logo ? (
+                  <img src={settings.logo} alt={settings.title} />
+                ) : (
+                  settings.title
+                )
+              }
+            </a>
+            <div class="gh-head-brand-wrapper">
+              <button class="gh-search" data-ghost-search>
+                <IconSearch />
+              </button>
+              <a class="gh-burger" role="button">
+                <div class="gh-burger-box">
+                  <div class="gh-burger-inner"></div>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class="gh-head-menu">
+            {
+              settings.navigation && (
+                <Navigation navigation={settings.navigation} />
+              )
+            }
+          </div>
+          <div class="gh-head-actions">
+            <button class="gh-search" data-ghost-search>
+              <IconSearch />
+            </button>
+            <div class="gh-social">
+              {
+                settings.facebook && (
+                  <a
+                    class="gh-social-link gh-social-facebook"
+                    href={`https://www.facebook.com/${settings.facebook.replace(
+                      /^\//,
+                      ``
+                    )}`}
+                    title="Facebook"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <IconFacebook />
+                  </a>
+                )
+              }
+              {
+                settings.twitter && (
+                  <a
+                    class="gh-social-link gh-social-twitter"
+                    href={`https://twitter.com/${settings.twitter.replace(
+                      /^@/,
+                      ``
+                    )}`}
+                    title="Twitter"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <IconTwitter />
+                  </a>
+                )
+              }
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <div class="site-content">
+        <slot />
+      </div>
+
+      <footer class="site-footer outer">
+        <div class="inner">
+          <section class="copyright">
+            <a href="/">{settings.title}</a> &copy; {
+              dateFormat(new Date(), { year: 'numeric' })
+            }
+          </section>
+          <nav class="site-footer-nav">
+            {
+              settings.secondary_navigation && (
+                <Navigation navigation={settings.secondary_navigation} />
+              )
+            }
+          </nav>
+          <div>
+            <a href="https://ghost.org/" target="_blank" rel="noopener"
+              >Powered by Ghost</a
+            >
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.min.js"
+      integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/ghost@5.12.0/content/themes/casper/assets/built/casper.min.js"
+    ></script>
+    <script is:inline>
+      $(document).ready(function () {
+        // Mobile Menu Trigger
+        $('.gh-burger').click(function () {
+          $('body').toggleClass('gh-head-open');
+        });
+        // FitVids - Makes video embeds responsive
+        $('.gh-content').fitVids();
+      });
+    </script>
+
+    <Fragment set:html={settings.codeinjection_foot} />
+    <Fragment set:html={codeInjectionFoot} />
+
+    <script
+      src="https://cdn.jsdelivr.net/combine/npm/ghost@5.12.0/core/frontend/src/cards/js/audio.min.js,npm/ghost@5.12.0/core/frontend/src/cards/js/before-after.min.js,npm/ghost@5.12.0/core/frontend/src/cards/js/gallery.min.js,npm/ghost@5.12.0/core/frontend/src/cards/js/toggle.min.js,npm/ghost@5.12.0/core/frontend/src/cards/js/video.min.js"
+    ></script>
+    <div id="sodo-search-root"></div>
+  </body>
+</html>

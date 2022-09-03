@@ -1,0 +1,130 @@
+---
+import type { Author } from '@tryghost/content-api';
+import type { PostsOrPages } from 'types/ghost-content-api';
+import IconFacebook from '@components/icons/IconFacebook.astro';
+import IconTwitter from '@components/icons/IconTwitter.astro';
+import PostCard from '@components/PostCard.astro';
+import RemotePicture from '@components/RemotePicture.astro';
+import Layout from '@layouts/Layout.astro';
+import ghostClient from '@utils/ghost-client';
+
+interface Props {
+  author: Author;
+  posts: PostsOrPages;
+}
+
+export async function getStaticPaths() {
+  const authors = await ghostClient.authors.browse({ limit: 'all' });
+
+  return await Promise.all(
+    authors.map(async (author) => {
+      const posts = await ghostClient.posts.browse({
+        limit: 'all',
+        filter: [`author:${author.slug}`],
+        include: ['tags', 'authors'],
+      });
+
+      return {
+        params: { slug: author.slug },
+        props: { author, posts },
+      };
+    })
+  );
+}
+
+const { author, posts } = Astro.props;
+---
+
+<Layout
+  title={author.meta_title ?? author.name}
+  description={author.meta_description ?? author.bio}
+  bodyClass={['author-template', `author-${author.slug}`]}
+>
+  <main id="site-main" class="site-main outer">
+    <div class="post-feed inner">
+      <section class="post-card post-card-large">
+        {
+          author.cover_image && (
+            <div class="post-card-image-link">
+              <RemotePicture
+                classNames="post-card-image"
+                widths={[300, 600, 1000, 2000]}
+                sizes="(max-width: 1000px) 400px, 800px"
+                src={author.cover_image}
+                alt={author.name}
+              />
+            </div>
+          )
+        }
+
+        <div class="post-card-content">
+          <div class="post-card-content-link">
+            {
+              author.profile_image && (
+                <img
+                  class="author-profile-pic"
+                  src={author.profile_image}
+                  alt={author.name}
+                />
+              )
+            }
+
+            <header class="post-card-header">
+              <h2 class="post-card-title">{author.name}</h2>
+            </header>
+
+            {author.bio && <div class="post-card-excerpt">{author.bio}</div>}
+
+            <footer class="author-profile-footer">
+              {
+                author.location && (
+                  <div class="author-profile-location">{author.location}</div>
+                )
+              }
+              <div class="author-profile-meta">
+                {
+                  author.website && (
+                    <a
+                      class="author-profile-social-link"
+                      href={author.website}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {author.website}
+                    </a>
+                  )
+                }
+                {
+                  author.twitter && (
+                    <a
+                      class="author-profile-social-link"
+                      href={author.twitter}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <IconTwitter />
+                    </a>
+                  )
+                }
+                {
+                  author.facebook && (
+                    <a
+                      class="author-profile-social-link"
+                      href={author.facebook}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <IconFacebook />
+                    </a>
+                  )
+                }
+              </div>
+            </footer>
+          </div>
+        </div>
+      </section>
+
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </main>
+</Layout>

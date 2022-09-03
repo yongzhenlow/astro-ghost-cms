@@ -1,0 +1,49 @@
+---
+import type { PostOrPage } from '@tryghost/content-api';
+import themeConfig from '@utils/theme.config';
+import RemotePicture from '@components/RemotePicture.astro';
+
+export interface Props {
+  page: PostOrPage;
+}
+
+const { page } = Astro.props;
+---
+
+<main id="site-main" class="site-main">
+  <article
+    class:list={[
+      'article',
+      page.tags && page.tags.map((tag) => `tag-${tag.slug}`),
+      {
+        featured: page.featured,
+        'no-image': !page.feature_image,
+        'image-full': themeConfig.post_image_style === 'Full',
+        'image-small': themeConfig.post_image_style === 'Small',
+      },
+    ]}
+  >
+    <header class="article-header gh-canvas">
+      <h1 class="article-title">{page.title}</h1>
+
+      {
+        page.feature_image && (
+          <figure class="article-image">
+            <RemotePicture
+              widths={[300, 600, 1000, 2000]}
+              sizes="(min-width: 1400px) 1400px, 92vw"
+              src={page.feature_image}
+              alt={page.feature_image_alt ?? page.title}
+            />
+
+            {page.feature_image_caption && (
+              <figcaption>{page.feature_image_caption}</figcaption>
+            )}
+          </figure>
+        )
+      }
+    </header>
+
+    <section class="gh-content gh-canvas" set:html={page.html}></section>
+  </article>
+</main>
