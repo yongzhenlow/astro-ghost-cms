@@ -1,8 +1,9 @@
 import { defineConfig } from 'astro/config';
 
-import image from "@astrojs/image";
+import image from '@astrojs/image';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [image()]
+  site: 'http://yourwebsite.com', // your production url
+  integrations: [image()],
 });
