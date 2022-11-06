@@ -1,4 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "(.*)/rss",
+      "headers": [
+        {
+          "key": "content-type",
+          "value": "text/xml"
+        }
+      ]
+    }
+  ]
 }
