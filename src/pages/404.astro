@@ -1,0 +1,34 @@
+---
+import PostCard from '@components/PostCard.astro';
+import Layout from '@layouts/Layout.astro';
+import ghostClient from '@utils/ghost-client';
+
+const morePosts = await ghostClient.posts.browse({
+  limit: 3,
+  include: ['tags', 'authors'],
+});
+---
+
+<Layout bodyClass="home-template">
+  <section class="outer error-content">
+    <div class="inner">
+      <section class="error-message">
+        <h1 class="error-code">404</h1>
+        <p class="error-description">Page not found</p>
+        <a class="error-link" href="/">Go to the front page →</a>
+      </section>
+    </div>
+  </section>
+
+  <aside class="read-more-wrap outer">
+    <div class="read-more inner">
+      {morePosts.map((post) => <PostCard post={post} />)}
+    </div>
+  </aside>
+</Layout>
+
+<style>
+  .error-link {
+    color: var(--color-secondary-text);
+  }
+</style>
