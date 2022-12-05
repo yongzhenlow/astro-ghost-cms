@@ -30,6 +30,8 @@ const { title, description, bodyClass, codeInjectionHead, codeInjectionFoot } =
 const accentColorStyleTag =
   settings.accent_color &&
   `<style>:root {--ghost-accent-color: ${settings.accent_color};}</style>`;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!DOCTYPE html>
@@ -45,6 +47,7 @@ const accentColorStyleTag =
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <link rel="icon" type="image/png" href={settings.icon} />
+    <link rel="canonical" href={canonicalURL} />
     <meta name="HandheldFriendly" content="True" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
