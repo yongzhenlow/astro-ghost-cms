@@ -11,15 +11,15 @@
     "astro": "astro"
   },
   "devDependencies": {
-    "@astrojs/image": "^0.12.0",
+    "@astrojs/image": "^0.16.6",
     "@types/probe-image-size": "^7.2.0",
     "@types/tryghost__content-api": "^1.3.11",
-    "astro": "^1.6.12"
+    "astro": "^2.3.0"
   },
   "dependencies": {
-    "@tryghost/content-api": "^1.11.5",
-    "@tryghost/helpers": "^1.1.75",
-    "nanostores": "^0.7.1",
+    "@tryghost/content-api": "^1.11.9",
+    "@tryghost/helpers": "^1.1.78",
+    "nanostores": "^0.8.0",
     "probe-image-size": "^7.2.3"
   }
 }
