@@ -78,13 +78,23 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         'has-serif-title': themeConfig.title_font === 'Elegant serif',
         'has-sans-body': themeConfig.body_font === 'Modern sans-serif',
         'has-cover': themeConfig.show_publication_cover,
-        'no-logo':
-          Astro.url.pathname === '/' && !themeConfig.show_logo_in_navigation,
+        'is-head-left-logo': themeConfig.navigation_layout === 'Logo on cover',
+        'is-head-middle-logo':
+          themeConfig.navigation_layout === 'Logo in the middle',
+        'is-head-stacked': themeConfig.navigation_layout === 'Stacked',
       },
     ]}
   >
     <div class="viewport">
-      <header id="gh-head" class="gh-head outer">
+      <header
+        id="gh-head"
+        class:list={[
+          'gh-head outer',
+          {
+            'is-header-hidden': themeConfig.header_style === 'Hidden',
+          },
+        ]}
+      >
         <nav class="gh-head-inner inner">
           <div class="gh-head-brand">
             <a

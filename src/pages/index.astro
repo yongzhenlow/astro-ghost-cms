@@ -37,7 +37,7 @@ const posts: PostsOrPages = await ghostClient.posts.browse({
     {
       themeConfig.header_style !== 'Hidden' && (
         <div class="site-header-inner inner">
-          {!themeConfig.show_logo_in_navigation &&
+          {themeConfig.navigation_layout === 'Logo on cover' &&
             (settings.logo ? (
               <img class="site-logo" src={settings.logo} alt={settings.title} />
             ) : (
