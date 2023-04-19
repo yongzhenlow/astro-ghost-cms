@@ -23,6 +23,19 @@ export default defineConfig({
 });
 ```
 
+## Theme Configuration
+
+Theme settings are not exposed by Ghost Content API. You will have to manually set options for our Casper theme in `utils/theme.config.ts`. These should mirror your settings in your Ghost instance, under `Settings > Design`. Refer to the interface `CasperThemeOptions` for the values.
+
+```typescript
+const customOptions: Partial<CasperThemeOptions> = {
+  body_font: 'Modern sans-serif',
+  show_publication_cover: false,
+  feed_layout: 'Classic',
+  color_scheme: 'Dark',
+};
+```
+
 ## 🧞 Commands
 
 This project prefers the [yarn package manager](https://yarnpkg.com/).
