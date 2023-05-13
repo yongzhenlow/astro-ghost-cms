@@ -49,7 +49,5 @@ const { postOrPage } = Astro.props;
   codeInjectionHead={postOrPage.codeinjection_head}
   codeInjectionFoot={postOrPage.codeinjection_foot}
 >
-  <main class="container">
-    {postOrPage.page ? <Page page={postOrPage} /> : <Post post={postOrPage} />}
-  </main>
+  {postOrPage.page ? <Page page={postOrPage} /> : <Post post={postOrPage} />}
 </Layout>
